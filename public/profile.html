@@ -1,0 +1,52 @@
+<!DOCTYPE html>
+<html lang="ar" dir="rtl">
+<head><meta charset="UTF-8"><meta name="viewport" content="width=device-width, initial-scale=1.0"><title>Jacki - حسابي</title><link rel="stylesheet" href="style.css"><script src="js/i18n.js"></script></head>
+<body class="dark-theme">
+<div class="top-bar"><span class="jacki-logo" style="font-size:20px;">Jacki</span><button class="btn btn-dark" onclick="location.href='settings.html'">☰ الإعدادات</button></div>
+<div class="container">
+<div class="card" style="text-align:center;">
+<div class="avatar-wrapper" id="av">J</div>
+<h2 style="margin:4px 0;"><span id="pn"></span> <span id="pv"></span> <span id="pvip"></span></h2>
+<div id="pu" style="color:var(--text-secondary);font-size:13px;"></div>
+<div style="margin:6px 0;"><span style="background:var(--bg-elevated);padding:4px 10px;border-radius:10px;font-size:12px;">ID: <strong id="pid"></strong></span></div>
+<p id="pb" style="font-size:13px;color:var(--text-secondary);"></p>
+<div style="display:flex;justify-content:center;gap:25px;margin:12px 0;"><div><strong id="pfg">0</strong><div>أتابع</div></div><div><strong id="pfr">0</strong><div>متابعين</div></div></div>
+<div style="display:flex;gap:6px;justify-content:center;flex-wrap:wrap;">
+<button class="btn btn-gold" onclick="location.href='wallet.html'">💰 المحفظة</button>
+<button class="btn btn-dark" onclick="tg('st-s')">🛍️ المتجر</button>
+<button class="btn btn-dark" onclick="tg('lb-s')">📊 المتصدرين</button>
+<button class="btn btn-dark" onclick="tg('sd-s')">🎥 الاستوديو</button>
+<button class="btn btn-dark" onclick="reqV()">✔ توثيق</button>
+</div></div>
+<div class="card" id="st-s" style="display:none;"><h3>🛍️ متجر الإطارات والفقاعات</h3><div id="st-l"></div></div>
+<div class="card" id="lb-s" style="display:none;"><h3>📊 لوحة المتصدرين</h3><div id="lb-l"></div></div>
+<div class="card" id="sd-s" style="display:none;"><h3>🎥 استوديو صانع المحتوى</h3><div id="sd-l"></div></div>
+<div class="card" id="adm-p" style="display:none;border:1px solid var(--accent-pink);">
+<h3 style="color:var(--accent-pink);margin-top:0;">👑 لوحة تحكم المطور والإدارة (Jacki Admin)</h3>
+<div class="input-group"><input type="text" id="atid" placeholder="ID المستخدم المستهدف..."></div>
+<div class="input-group" style="display:flex;gap:6px;"><input type="text" id="aag" placeholder="ID الوكالة (لفتح البث)..."><button class="btn btn-green" onclick="adm('unlock_agency_live')">فتح البث والوكالة</button></div>
+<div class="input-group"><select id="arsn"><option value="تنمر وإساءة">تنمر وإساءة</option><option value="محتوى مخالف">محتوى مخالف</option><option value="سب وقذف">سب وقذف</option></select></div>
+<div style="display:flex;gap:6px;flex-wrap:wrap;margin-bottom:10px;">
+<button class="btn btn-gold" onclick="adm('warn')">⚠️ إنذار</button>
+<button class="btn btn-primary" onclick="adm('ban')">⛔ حظر</button>
+<button class="btn btn-dark" onclick="adm('unban')">✅ فك حظر</button>
+<button class="btn btn-dark" onclick="adm('delete')">🗑️ حذف</button>
+<button class="btn btn-dark" onclick="adm('assign_role','admin')">🛡️ تعيين أدمن</button>
+<button class="btn btn-dark" onclick="adm('assign_role','support')">🎧 تعيين دعم</button>
+<button class="btn btn-dark" onclick="adm('verify_direct',null,'gold')">🏅 توثيق</button>
+</div>
+<div id="adm-data" style="font-size:12px;"></div>
+</div></div>
+<nav class="bottom-nav"><a href="index.html" class="nav-item">🏠<span>الرئيسية</span></a><a href="live.html" class="nav-item">🔴<span>اللايف</span></a><a href="voice.html" class="nav-item">🎙️<span>غرف صوتية</span></a><a href="chat.html" class="nav-item">💬<span>الدردشة</span></a><a href="notifications.html" class="nav-item">🔔<span>الإشعارات</span></a><a href="profile.html" class="nav-item active">👤<span>حسابي</span></a></nav>
+<script>
+const uid=localStorage.getItem('jacki_userId');if(!uid)location.href='auth.html';
+function tg(i){const e=document.getElementById(i);e.style.display=e.style.display==='none'?'block':'none';}
+async function ld(){const r=await fetch(`/api/user/${uid}?viewerId=${uid}`);const u=await r.json();document.getElementById('pn').innerText=u.name;document.getElementById('pu').innerText=u.username;document.getElementById('pid').innerText=u.id;document.getElementById('pb').innerText=u.bio||'';document.getElementById('pfg').innerText=u.followingCount;document.getElementById('pfr').innerText=u.followersCount;document.getElementById('av').innerText=u.name[0];if(u.activeFrame)document.getElementById('av').classList.add('frame-'+u.activeFrame);if(u.isVerified)document.getElementById('pv').innerHTML=`<span class="verified-${u.verificationBadge}">✔</span>`;if(u.vipLevel>0)document.getElementById('pvip').innerHTML=`<span class="vip-badge">VIP ${u.vipLevel}</span>`;document.getElementById('sd-l').innerHTML=`الأرباح: ${u.totalEarned} ج.م | الدعم: ${u.totalSpent} ج.م`;if(u.role==='developer'||u.role==='admin'||u.role==='support'){document.getElementById('adm-p').style.display='block';ldAdm();}}
+fetch('/api/store/items').then(r=>r.json()).then(l=>{document.getElementById('st-l').innerHTML=l.map(i=>`<div style="display:flex;justify-content:space-between;padding:6px 0;"><span>${i.name} (${i.price} ج)</span><button class="btn btn-gold" onclick="buy('${i.id}')">شراء</button></div>`).join('');});
+fetch('/api/leaderboard').then(r=>r.json()).then(d=>{document.getElementById('lb-l').innerHTML=`<strong>أكبر الداعمين:</strong><br>`+d.topGivers.map((u,i)=>`#${i+1} ${u.name} (${u.totalSpent} ج)`).join('<br>');});
+async function buy(id){const r=await fetch('/api/store/buy',{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify({userId:uid,itemId:id})});const d=await r.json();alert(d.message||d.error);ld();}
+async function reqV(){const r=prompt('سبب التوثيق:');if(r){const res=await fetch('/api/verification/request',{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify({userId:uid,reason:r})});alert((await res.json()).message);}}
+async function ldAdm(){const r=await fetch(`/api/admin/overview?adminId=${uid}`);const d=await r.json();document.getElementById('adm-data').innerHTML=d.users.map(u=>`ID: <b>${u.id}</b> | ${u.name} (${u.role}) | وكالة: ${u.agencyId||'-'}`).join('<br>');}
+async function adm(a,role=null,b=null){const r=await fetch('/api/admin/action',{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify({adminId:uid,targetUserId:document.getElementById('atid').value,action:a,reason:document.getElementById('arsn').value,agencyId:document.getElementById('aag').value,role,badgeType:b})});const d=await r.json();alert(d.message||d.error);ldAdm();}
+ld();
+</script></body></html>

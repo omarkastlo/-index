@@ -1,0 +1,110 @@
+{
+  "users": {
+    "1": {
+      "id": "1",
+      "username": "@admin",
+      "name": "Jacki Official Developer",
+      "contactType": "email",
+      "contact": "admin",
+      "password": "adminkastlo",
+      "role": "developer",
+      "agencyId": "JACKI_HQ",
+      "liveUnlocked": true,
+      "isVerified": true,
+      "verificationBadge": "gold",
+      "vipLevel": 15,
+      "totalSpent": 150000,
+      "totalEarned": 0,
+      "wallet": 50000,
+      "followers": [],
+      "following": [],
+      "hideFollowing": false,
+      "lockMessages": false,
+      "isPrivate": false,
+      "activeFrame": "gold_dragon",
+      "activeBubble": "royal_gold",
+      "ownedItems": [
+        "gold_dragon",
+        "neon_pulse",
+        "royal_gold",
+        "cyber_bubble"
+      ],
+      "bio": "المطور الرسمي ومؤسس منصة Jacki",
+      "warnings": [],
+      "banned": false,
+      "banReason": null
+    },
+    "50988": {
+      "id": "50988",
+      "username": "@kastlo",
+      "name": "kastlo",
+      "contactType": "phone",
+      "contact": "01211495027",
+      "password": "134679852",
+      "role": "user",
+      "agencyId": null,
+      "liveUnlocked": false,
+      "isVerified": false,
+      "verificationBadge": null,
+      "vipLevel": 0,
+      "totalSpent": 0,
+      "totalEarned": 0,
+      "wallet": 0,
+      "followers": [],
+      "following": [],
+      "hideFollowing": false,
+      "lockMessages": false,
+      "isPrivate": false,
+      "activeFrame": null,
+      "activeBubble": null,
+      "ownedItems": [],
+      "bio": "مستخدم جديد في Jacki",
+      "warnings": [],
+      "banned": false,
+      "banReason": null
+    }
+  },
+  "videos": [],
+  "stories": [],
+  "notifications": {
+    "1": [
+      {
+        "id": 1,
+        "title": "مرحباً بك في Jacki 👑",
+        "message": "تم تفعيل لوحة المطور الحصرية بنجاح.",
+        "type": "system",
+        "time": "الآن"
+      }
+    ],
+    "50988": [
+      {
+        "id": 1794926029878,
+        "title": "أهلاً بك في Jacki 🎉",
+        "message": "تم إنشاء حسابك برقم ID: 50988",
+        "type": "system",
+        "time": "الآن"
+      }
+    ]
+  },
+  "chats": [],
+  "withdrawalRequests": [],
+  "verificationRequests": [],
+  "voiceRooms": [
+    {
+      "id": "room_1",
+      "title": "مجلس سمر Jacki الرسمي 🎙️",
+      "hostId": "1",
+      "hostName": "Jacki Official",
+      "seats": [
+        null,
+        null,
+        null,
+        null,
+        null,
+        null,
+        null,
+        null
+      ]
+    }
+  ]
+}

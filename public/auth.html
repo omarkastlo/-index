@@ -1,0 +1,26 @@
+<!DOCTYPE html>
+<html lang="ar" dir="rtl">
+<head><meta charset="UTF-8"><meta name="viewport" content="width=device-width, initial-scale=1.0"><title>Jacki - تسجيل الدخول</title><link rel="stylesheet" href="style.css"><script src="js/i18n.js"></script></head>
+<body class="dark-theme">
+<div class="auth-container"><div class="auth-card">
+<div style="text-align:center;"><div class="jacki-logo">Jacki</div><p style="color:var(--text-secondary);font-size:13px;">منصة الفيديوهات والبث المباشر والمجتمع الصوتي</p></div>
+<div class="auth-tabs"><button id="tab-login" class="active" onclick="sw('login')">تسجيل الدخول</button><button id="tab-register" onclick="sw('register')">حساب جديد</button></div>
+<form id="login-form" onsubmit="doLogin(event)">
+<div class="input-group"><label>الهاتف، البريد، أو اسم المستخدم</label><input type="text" id="l-id" required></div>
+<div class="input-group"><label>كلمة المرور</label><input type="password" id="l-pass" required></div>
+<button type="submit" class="btn btn-primary full-btn">دخول إلى Jacki</button>
+</form>
+<form id="register-form" style="display:none;" onsubmit="doReg(event)">
+<div class="input-group"><label>الاسم الظاهر</label><input type="text" id="r-name" required></div>
+<div class="input-group"><label>اسم المستخدم (@username)</label><input type="text" id="r-user"></div>
+<div class="input-group"><label>طريقة التسجيل الإجبارية</label><select id="r-type"><option value="phone">📱 رقم الهاتف</option><option value="email">📧 البريد الإلكتروني</option></select></div>
+<div class="input-group"><label>رقم الهاتف أو البريد</label><input type="text" id="r-contact" required></div>
+<div class="input-group"><label>كلمة المرور (6 أحرف فأكثر)</label><input type="password" id="r-pass" required></div>
+<button type="submit" class="btn btn-gold full-btn">إنشاء الحساب</button>
+</form>
+</div></div>
+<script>
+function sw(m){document.getElementById('login-form').style.display=m==='login'?'block':'none';document.getElementById('register-form').style.display=m==='register'?'block':'none';document.getElementById('tab-login').classList.toggle('active',m==='login');document.getElementById('tab-register').classList.toggle('active',m==='register');}
+async function doLogin(e){e.preventDefault();const r=await fetch('/api/auth/login',{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify({identifier:document.getElementById('l-id').value,password:document.getElementById('l-pass').value})});const d=await r.json();if(!r.ok)return alert(d.error);localStorage.setItem('jacki_userId',d.user.id);location.href='index.html';}
+async function doReg(e){e.preventDefault();const r=await fetch('/api/auth/register',{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify({name:document.getElementById('r-name').value,username:document.getElementById('r-user').value,contactType:document.getElementById('r-type').value,contact:document.getElementById('r-contact').value,password:document.getElementById('r-pass').value})});const d=await r.json();if(!r.ok)return alert(d.error);localStorage.setItem('jacki_userId',d.user.id);location.href='index.html';}
+</script></body></html>

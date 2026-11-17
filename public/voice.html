@@ -1,0 +1,18 @@
+<!DOCTYPE html>
+<html lang="ar" dir="rtl">
+<head><meta charset="UTF-8"><meta name="viewport" content="width=device-width, initial-scale=1.0"><title>Jacki - الغرف الصوتية</title><link rel="stylesheet" href="style.css"><script src="/socket.io/socket.io.js"></script></head>
+<body class="dark-theme">
+<div class="top-bar"><span class="jacki-logo" style="font-size:20px;">Jacki Voice</span><button class="btn btn-gold" onclick="crR()">+ إنشاء غرفة</button></div>
+<div class="container" id="v-list"></div>
+<div class="container" id="v-stage" style="display:none;"><div class="card"><div style="display:flex;justify-content:space-between;"><h3 id="vt" style="margin:0;"></h3><button class="btn btn-dark" onclick="location.reload()">✕</button></div><div id="seats" style="display:grid;grid-template-columns:repeat(4,1fr);gap:8px;margin:14px 0;text-align:center;"></div><button class="btn btn-dark full-btn" onclick="socket.emit('leave_voice_seat',{roomId:crId,userId:uid})">نزول من المايك</button></div><div class="card" id="vc" style="height:180px;overflow-y:auto;"></div><div style="display:flex;gap:8px;"><input type="text" id="vi"><button class="btn btn-primary" onclick="sv()">إرسال</button></div></div>
+<nav class="bottom-nav"><a href="index.html" class="nav-item">🏠<span>الرئيسية</span></a><a href="live.html" class="nav-item">🔴<span>اللايف</span></a><a href="voice.html" class="nav-item active">🎙️<span>غرف صوتية</span></a><a href="chat.html" class="nav-item">💬<span>الدردشة</span></a><a href="notifications.html" class="nav-item">🔔<span>الإشعارات</span></a><a href="profile.html" class="nav-item">👤<span>حسابي</span></a></nav>
+<script>
+const socket=io(),uid=localStorage.getItem('jacki_userId');if(!uid)location.href='auth.html';let crId=null;
+async function ld(){const r=await fetch('/api/voice/rooms');const l=await r.json();document.getElementById('v-list').innerHTML=l.map(x=>`<div class="card" style="display:flex;justify-content:space-between;"><strong>🎙️ ${x.title}</strong><button class="btn btn-primary" onclick="en('${x.id}')">دخول</button></div>`).join('');}
+async function crR(){const t=prompt('اسم الغرفة:');if(t){await fetch('/api/voice/rooms',{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify({hostId:uid,title:t})});ld();}}
+function en(id){crId=id;document.getElementById('v-list').style.display='none';document.getElementById('v-stage').style.display='block';socket.emit('join_voice_room',{roomId:id});}
+socket.on('voice_room_state',r=>{document.getElementById('vt').innerText=r.title;document.getElementById('seats').innerHTML=r.seats.map((s,i)=>`<div onclick="socket.emit('take_voice_seat',{roomId:crId,seatIndex:${i},userId:uid})" style="background:var(--bg-primary);padding:10px;border-radius:10px;cursor:pointer;">${s?'🎤 '+s.name:'💺 مقعد '+(i+1)}</div>`).join('');});
+function sv(){const i=document.getElementById('vi');if(i.value){socket.emit('voice_chat_msg',{roomId:crId,userId:uid,msg:i.value});i.value='';}}
+socket.on('new_voice_msg',d=>document.getElementById('vc').innerHTML+=`<div><strong>${d.userName}:</strong> ${d.msg}</div>`);
+ld();
+</script></body></html>

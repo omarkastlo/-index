@@ -1,0 +1,20 @@
+<!DOCTYPE html>
+<html lang="ar" dir="rtl">
+<head><meta charset="UTF-8"><meta name="viewport" content="width=device-width, initial-scale=1.0"><title>Jacki - الإعدادات</title><link rel="stylesheet" href="style.css"><script src="js/i18n.js"></script></head>
+<body class="dark-theme">
+<div class="top-bar"><span class="jacki-logo" style="font-size:20px;">Jacki Settings</span><button class="btn btn-dark" onclick="location.href='profile.html'">↩️</button></div>
+<div class="container"><div class="card"><h3>✏️ البيانات والخصوصية</h3>
+<div class="input-group"><label>الاسم</label><input type="text" id="sn"></div>
+<div class="input-group"><label>اسم المستخدم</label><input type="text" id="su"></div>
+<div class="input-group"><label>الوصف</label><input type="text" id="sb"></div>
+<div class="input-group"><label>بيانات التواصل (سرية تماماً)</label><input type="text" id="sc" disabled></div>
+<label style="display:flex;justify-content:space-between;margin:10px 0;"><span>إخفاء قائمة "أتابع" عن الآخرين</span><input type="checkbox" id="shf"></label>
+<label style="display:flex;justify-content:space-between;margin:10px 0;"><span>قفل الرسائل الخاصة</span><input type="checkbox" id="slm"></label>
+<button class="btn btn-green full-btn" onclick="sv()">حفظ التعديلات</button></div>
+<div class="card"><h3 data-i18n="language">🌐 لغة التطبيق</h3><select id="sl" onchange="localStorage.setItem('jacki_lang',this.value);applyAppLanguage();"><option value="ar">العربية</option><option value="en">English</option></select></div>
+<button class="btn btn-primary full-btn" onclick="localStorage.removeItem('jacki_userId');location.href='auth.html'">تسجيل الخروج</button></div>
+<script>
+const uid=localStorage.getItem('jacki_userId');if(!uid)location.href='auth.html';
+fetch(`/api/user/${uid}?viewerId=${uid}`).then(r=>r.json()).then(u=>{document.getElementById('sn').value=u.name;document.getElementById('su').value=u.username;document.getElementById('sb').value=u.bio||'';document.getElementById('sc').value=u.contact||'';document.getElementById('shf').checked=u.hideFollowing;document.getElementById('slm').checked=u.lockMessages;});
+async function sv(){await fetch(`/api/user/${uid}/update-profile`,{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify({name:document.getElementById('sn').value,username:document.getElementById('su').value,bio:document.getElementById('sb').value,hideFollowing:document.getElementById('shf').checked,lockMessages:document.getElementById('slm').checked})});alert('تم الحفظ');}
+</script></body></html>

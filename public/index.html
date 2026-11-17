@@ -1,0 +1,41 @@
+<!DOCTYPE html>
+<html lang="ar" dir="rtl">
+<head><meta charset="UTF-8"><meta name="viewport" content="width=device-width, initial-scale=1.0"><title>Jacki - الرئيسية</title><link rel="stylesheet" href="style.css"><script src="js/i18n.js"></script></head>
+<body class="dark-theme no-scroll">
+<div class="top-nav-tabs">
+<span class="jacki-logo" style="font-size:18px;position:absolute;right:16px;">Jacki</span>
+<button class="nav-tab" id="tab-following" onclick="switchFeed('following')">أتابع</button>
+<span style="color:#555;">|</span>
+<button class="nav-tab active" id="tab-foryou" onclick="switchFeed('foryou')">لك (For You)</button>
+<button class="btn btn-gold" style="position:absolute;left:16px;padding:5px 10px;font-size:12px;" onclick="document.getElementById('up-m').classList.add('open')">+ نشر</button>
+</div>
+<div class="stories-bar" id="stories-strip"></div>
+<div class="feed-container" id="video-feed"></div>
+<div class="modal-backdrop" id="up-m" onclick="if(event.target===this)this.classList.remove('open')">
+<div class="modal-sheet"><h3>🎬 نشر فيديو أو قصة على Jacki</h3>
+<div class="input-group"><select id="pub-type"><option value="video">فيديو قصير</option><option value="story">قصة 24 ساعة</option></select></div>
+<div class="input-group"><input type="text" id="pub-url" placeholder="رابط الفيديو (MP4) أو نص القصة..."></div>
+<div class="input-group"><input type="text" id="pub-cap" placeholder="الوصف..."></div>
+<button class="btn btn-primary full-btn" onclick="pub()">نشر الآن</button></div></div>
+<div class="modal-backdrop" id="cm-m" onclick="if(event.target===this)this.classList.remove('open')">
+<div class="modal-sheet"><h3>💬 التعليقات</h3><div id="cm-list" style="max-height:45vh;overflow-y:auto;margin-bottom:10px;"></div>
+<div style="display:flex;gap:8px;"><input type="text" id="cm-in" placeholder="اكتب تعليقاً أو @منشن..."><button class="btn btn-green" onclick="sendCm()">إرسال</button></div></div></div>
+<nav class="bottom-nav">
+<a href="index.html" class="nav-item active">🏠<span>الرئيسية</span></a>
+<a href="live.html" class="nav-item">🔴<span>اللايف</span></a>
+<a href="voice.html" class="nav-item">🎙️<span>غرف صوتية</span></a>
+<a href="chat.html" class="nav-item">💬<span>الدردشة</span></a>
+<a href="notifications.html" class="nav-item">🔔<span>الإشعارات</span></a>
+<a href="profile.html" class="nav-item">👤<span>حسابي</span></a>
+</nav>
+<script>
+const uid=localStorage.getItem('jacki_userId');if(!uid)location.href='auth.html';
+let mode='foryou',actVid=null;
+async function loadStories(){const r=await fetch('/api/stories');const s=await r.json();document.getElementById('stories-strip').innerHTML=`<div class="story-bubble" onclick="document.getElementById('up-m').classList.add('open')"><div class="story-ring"><div class="story-ring-inner">+</div></div><span>قصتك</span></div>`+s.map(x=>`<div class="story-bubble" onclick="alert('${x.userName}: ${x.mediaContent}')"><div class="story-ring"><div class="story-ring-inner">${x.userName[0]}</div></div><span>${x.userName}</span></div>`).join('');}
+async function switchFeed(m){mode=m;document.getElementById('tab-foryou').classList.toggle('active',m==='foryou');document.getElementById('tab-following').classList.toggle('active',m==='following');const r=await fetch(`/api/videos?mode=${m}&userId=${uid}`);const v=await r.json();const f=document.getElementById('video-feed');if(!v.length){f.innerHTML=`<div style="height:100vh;display:flex;align-items:center;justify-content:center;color:var(--text-secondary);">لا توجد فيديوهات بعد. اضغط (+ نشر) بالأعلى.</div>`;return;}f.innerHTML=v.map(x=>`<div class="video-slide"><video src="${x.videoUrl}" loop playsinline onclick="this.paused?this.play():this.pause()"></video><div class="video-overlay-info"><h4>${x.authorName} (${x.username}) ${x.vipLevel>0?`<span class="vip-badge">VIP ${x.vipLevel}</span>`:''}</h4><p>${x.caption}</p></div><div class="side-actions"><button class="action-circle-btn" onclick="lk('${x.id}')">❤️<small>${x.likes.length}</small></button><button class="action-circle-btn" onclick="opCm('${x.id}')">💬<small>${x.comments.length}</small></button></div></div>`).join('');}
+async function pub(){const t=document.getElementById('pub-type').value,u=document.getElementById('pub-url').value,c=document.getElementById('pub-cap').value;const r=await fetch(t==='video'?'/api/videos':'/api/stories',{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify(t==='video'?{userId:uid,videoUrl:u,caption:c}:{userId:uid,mediaType:'text',mediaContent:u,caption:c})});const d=await r.json();if(!r.ok)return alert(d.error);document.getElementById('up-m').classList.remove('open');loadStories();switchFeed(mode);}
+async function lk(id){await fetch(`/api/videos/${id}/like`,{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify({userId:uid})});switchFeed(mode);}
+async function opCm(id){actVid=id;document.getElementById('cm-m').classList.add('open');const r=await fetch(`/api/videos?mode=${mode}&userId=${uid}`);const vs=await r.json();const v=vs.find(x=>String(x.id)===String(id));document.getElementById('cm-list').innerHTML=(v?v.comments:[]).map(c=>`<div style="background:var(--bg-primary);padding:8px;border-radius:8px;margin-bottom:6px;"><strong>${c.userName}:</strong> ${c.text}</div>`).join('');}
+async function sendCm(){const t=document.getElementById('cm-in').value;const r=await fetch(`/api/videos/${actVid}/comment`,{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify({userId:uid,text:t})});const d=await r.json();if(!r.ok)return alert(d.error);document.getElementById('cm-in').value='';opCm(actVid);}
+loadStories();switchFeed('foryou');
+</script></body></html>

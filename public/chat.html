@@ -1,0 +1,18 @@
+<!DOCTYPE html>
+<html lang="ar" dir="rtl">
+<head><meta charset="UTF-8"><meta name="viewport" content="width=device-width, initial-scale=1.0"><title>Jacki - الدردشة</title><link rel="stylesheet" href="style.css"><script src="/socket.io/socket.io.js"></script></head>
+<body class="dark-theme">
+<div class="top-bar"><span class="jacki-logo" style="font-size:20px;">Jacki Chat</span><button class="btn btn-dark" onclick="const p=prompt('ID المستخدم:');if(p)op(p,'مستخدم #'+p)">+ محادثة</button></div>
+<div class="container" id="c-list"></div>
+<div class="container" id="c-th" style="display:none;"><div class="card" style="display:flex;justify-content:space-between;"><strong id="ph"></strong><button class="btn btn-dark" onclick="location.reload()">↩️</button></div><div id="ma" style="height:52vh;overflow-y:auto;display:flex;flex-direction:column;gap:8px;padding:10px;background:var(--bg-secondary);border-radius:12px;"></div>
+<div style="display:flex;gap:6px;margin:8px 0;"><button class="btn btn-dark" onclick="sr('sticker','🔥👑')">ملصق 🔥</button><button class="btn btn-dark" onclick="const u=prompt('رابط الصورة:');if(u)sr('image',u)">🖼️ صورة</button><button class="btn btn-dark" onclick="sr('voice','0:05 ılılıllı')">🎤 صوتية</button></div>
+<div style="display:flex;gap:8px;"><input type="text" id="ct"><button class="btn btn-green" onclick="const i=document.getElementById('ct');if(i.value){sr('text',i.value);i.value='';}">إرسال</button></div></div>
+<nav class="bottom-nav"><a href="index.html" class="nav-item">🏠<span>الرئيسية</span></a><a href="live.html" class="nav-item">🔴<span>اللايف</span></a><a href="voice.html" class="nav-item">🎙️<span>غرف صوتية</span></a><a href="chat.html" class="nav-item active">💬<span>الدردشة</span></a><a href="notifications.html" class="nav-item">🔔<span>الإشعارات</span></a><a href="profile.html" class="nav-item">👤<span>حسابي</span></a></nav>
+<script>
+const socket=io(),uid=localStorage.getItem('jacki_userId');if(!uid)location.href='auth.html';let pid=null;socket.emit('register_socket_user',uid);
+fetch(`/api/chats/conversations/${uid}`).then(r=>r.json()).then(l=>{document.getElementById('c-list').innerHTML=l.map(x=>`<div class="card" onclick="op('${x.peerId}','${x.name}')" style="cursor:pointer;"><strong>${x.name} (${x.username})</strong></div>`).join('');});
+async function op(id,n){pid=id;document.getElementById('c-list').style.display='none';document.getElementById('c-th').style.display='block';document.getElementById('ph').innerText=n;const r=await fetch(`/api/chat/${uid}/${id}`);const ms=await r.json();document.getElementById('ma').innerHTML=ms.map(rb).join('');}
+function rb(m){const cls=m.senderId===uid?`chat-bubble-me ${m.senderBubble?'bubble-'+m.senderBubble:''}`:'chat-bubble-peer';let b=m.content;if(m.msgType==='image')b=`<img src="${m.content}" style="max-width:180px;">`;if(m.msgType==='voice')b=`🎤 ${m.content}`;return `<div class="${cls}">${b}</div>`;}
+socket.on('new_private_msg',m=>{if(pid&&(m.senderId===pid||m.receiverId===pid))document.getElementById('ma').innerHTML+=rb(m);});
+async function sr(t,c){const r=await fetch('/api/chat/send',{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify({senderId:uid,receiverId:pid,msgType:t,content:c})});const d=await r.json();if(!r.ok)alert(d.error);}
+</script></body></html>

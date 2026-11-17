@@ -1,0 +1,14 @@
+<!DOCTYPE html>
+<html lang="ar" dir="rtl">
+<head><meta charset="UTF-8"><meta name="viewport" content="width=device-width, initial-scale=1.0"><title>Jacki - المحفظة</title><link rel="stylesheet" href="style.css"></head>
+<body class="dark-theme">
+<div class="top-bar"><span class="jacki-logo" style="font-size:20px;">Jacki Wallet</span><button class="btn btn-dark" onclick="location.href='profile.html'">↩️</button></div>
+<div class="container"><div class="card" style="text-align:center;"><span>الرصيد الحالي</span><h1 id="wb" style="color:var(--accent-green);">0.00 ج.م</h1><button class="btn btn-gold" onclick="tu()">+ شحن رصيد</button></div>
+<div class="card"><h3>💸 طلب سحب الأرباح</h3><div class="input-group"><input type="number" id="wa" placeholder="المبلغ (50+ ج.م)"></div><div class="input-group"><select id="wm"><option value="vodafone_cash">فودافون كاش</option><option value="instapay">إنستاباي</option><option value="orange_cash">أورنج كاش</option></select></div><div class="input-group"><input type="text" id="wn" placeholder="رقم المحفظة..."></div><button class="btn btn-green full-btn" onclick="wd()">إرسال طلب السحب</button></div></div>
+<script>
+const uid=localStorage.getItem('jacki_userId');if(!uid)location.href='auth.html';
+async function lw(){const r=await fetch(`/api/user/${uid}?viewerId=${uid}`);const u=await r.json();document.getElementById('wb').innerText=Number(u.wallet).toFixed(2)+' ج.م';}
+async function tu(){const a=prompt('مبلغ الشحن:');if(a>0){await fetch('/api/wallet/topup',{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify({userId:uid,amount:a})});lw();}}
+async function wd(){const r=await fetch('/api/wallet/withdraw',{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify({userId:uid,amount:document.getElementById('wa').value,method:document.getElementById('wm').value,accountNumber:document.getElementById('wn').value})});const d=await r.json();alert(d.message||d.error);lw();}
+lw();
+</script></body></html>

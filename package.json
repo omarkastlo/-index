@@ -1,0 +1,13 @@
+{
+  "name": "jacki-platform",
+  "version": "4.0.0",
+  "description": "Jacki (جاكي) - Enterprise Video, Live Streaming, PK Battles, Treasure Chests, Voice Rooms, Store & Admin Suite",
+  "main": "server.js",
+  "scripts": {
+    "start": "node server.js"
+  },
+  "dependencies": {
+    "express": "^4.18.2",
+    "socket.io": "^4.7.2"
+  }
+}

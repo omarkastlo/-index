@@ -1,0 +1,56 @@
+<!DOCTYPE html>
+<html lang="ar" dir="rtl">
+<head><meta charset="UTF-8"><meta name="viewport" content="width=device-width, initial-scale=1.0"><title>Jacki - البث المباشر</title><link rel="stylesheet" href="style.css"><script src="/socket.io/socket.io.js"></script></head>
+<body class="dark-theme">
+<div class="top-bar"><span class="jacki-logo" style="font-size:20px;">Jacki Live</span><button class="btn btn-primary" onclick="socket.emit('start_live_room',{hostId:uid})">🔴 بدء بث مباشر</button></div>
+<div class="container" id="lobby"><h3>📡 البثوث النشطة</h3><div id="lives-list"></div></div>
+<div class="container" id="room" style="display:none;">
+<div class="card"><div style="display:flex;justify-content:space-between;"><div><strong id="r-host"></strong></div><div>💰 <strong id="r-earn">0</strong> ج.م | 👁️ <strong id="r-view">1</strong> <button class="btn btn-dark" onclick="exitR()">✕</button></div></div>
+<div id="vip-area" style="margin-top:8px;"></div>
+<div id="pk-box" style="display:none;margin:10px 0;padding:10px;background:#000;border-radius:10px;border:1px solid var(--gold-primary);">
+<div style="display:flex;justify-content:space-between;font-size:12px;"><span id="pk-l">0</span><span>⚔️ PK</span><span id="pk-r">0</span></div>
+<div style="height:10px;background:var(--accent-pink);border-radius:5px;margin:6px 0;"><div id="pk-fill" style="width:50%;height:100%;background:var(--accent-cyan);"></div></div>
+<button class="btn btn-dark" style="font-size:11px;" onclick="pkSide='left'">دعم اليسار</button> <button class="btn btn-dark" style="font-size:11px;" onclick="pkSide='right'">دعم اليمين</button>
+</div>
+<div id="tr-box" style="display:none;margin:10px 0;padding:10px;background:#6d4c00;border-radius:10px;text-align:center;"><strong id="tr-t">🎁 صندوق كنز</strong> <button class="btn btn-gold" onclick="socket.emit('claim_treasure',{streamId:actS,userId:uid})">افتح</button></div>
+<div style="display:flex;gap:6px;margin-top:8px;flex-wrap:wrap;">
+<button class="btn btn-dark" onclick="const o=prompt('اسم المنافس:');if(o)socket.emit('start_pk',{streamId:actS,opponentName:o})">⚔️ تحدي PK</button>
+<button class="btn btn-dark" onclick="const c=prompt('عدد العملات (10+):','20');if(c)socket.emit('drop_treasure',{streamId:actS,senderId:uid,coins:c})">🎁 صندوق كنز</button>
+<button class="btn btn-dark" onclick="alert('🎮 عجلة الحظ: فزت بتحدي التفاعل!')">🎮 ألعاب</button>
+</div></div>
+<div class="card" style="height:220px;overflow-y:auto;" id="l-chat"></div>
+<div style="display:flex;gap:8px;"><button class="btn btn-gold" onclick="const g=document.getElementById('g-box');g.style.display=g.style.display==='none'?'block':'none'">🎁 صندوق الهدايا</button><input type="text" id="l-in" placeholder="تعليق..."><button class="btn btn-primary" onclick="sendC()">إرسال</button></div>
+<div id="g-box" class="card" style="display:none;margin-top:8px;">
+<button class="btn btn-dark" onclick="sendG('وردة 🌹',5)">🌹 وردة (5 ج)</button>
+<button class="btn btn-dark" onclick="sendG('تاج 👑',50)">👑 تاج (50 ج)</button>
+<button class="btn btn-dark" onclick="sendG('سيارة 🏎️',200)">🏎️ سيارة (200 ج)</button>
+</div></div>
+<nav class="bottom-nav"><a href="index.html" class="nav-item">🏠<span>الرئيسية</span></a><a href="live.html" class="nav-item active">🔴<span>اللايف</span></a><a href="voice.html" class="nav-item">🎙️<span>غرف صوتية</span></a><a href="chat.html" class="nav-item">💬<span>الدردشة</span></a><a href="notifications.html" class="nav-item">🔔<span>الإشعارات</span></a><a href="profile.html" class="nav-item">👤<span>حسابي</span></a></nav>
+<script>
+const socket=io(),uid=localStorage.getItem('jacki_userId');if(!uid)location.href='auth.html';
+let actS=null,isH=false,pkSide='left';
+fetch('/api/live/active').then(r=>r.json()).then(renderL);
+socket.on('active_lives_updated',renderL);
+function renderL(l){document.getElementById('lives-list').innerHTML=l.length?l.map(x=>`<div class="card" style="display:flex;justify-content:space-between;"><strong>🔴 ${x.hostName}</strong><button class="btn btn-primary" onclick="joinS('${x.streamId}')">دخول</button></div>`).join(''):'<div class="card">لا توجد بثوث نشطة حالياً.</div>';}
+socket.on('live_error',m=>alert(m));
+socket.on('live_started',s=>{isH=true;enterS(s);});
+function joinS(id){isH=false;actS=id;socket.emit('join_live',{streamId:id,userId:uid});document.getElementById('lobby').style.display='none';document.getElementById('room').style.display='block';}
+function enterS(s){actS=s.streamId;document.getElementById('lobby').style.display='none';document.getElementById('room').style.display='block';document.getElementById('r-host').innerText=s.hostName;document.getElementById('r-earn').innerText=s.totalEarned;document.getElementById('r-view').innerText=s.viewers;}
+socket.on('stream_state',enterS);
+socket.on('vip_entrance',d=>{document.getElementById('vip-area').innerHTML=`<div class="vip-banner-anim">${d.bannerText}</div>`;setTimeout(()=>document.getElementById('vip-area').innerHTML='',4500);});
+function sendC(){const i=document.getElementById('l-in');if(i.value){socket.emit('live_chat',{streamId:actS,userId:uid,msg:i.value});i.value='';}}
+socket.on('new_chat',d=>{const b=document.getElementById('l-chat');b.innerHTML+=`<div><strong style="color:var(--gold-primary);cursor:pointer;" onclick="modU('${d.userId}','${d.userName}')">${d.userName}:</strong> ${d.msg}</div>`;});
+function modU(tid,tn){if(tid===uid)return;const c=prompt(`تحكم المضيف في ${tn}:
+1=كتم 🔇 | 2=طرد ⛔ | 3=مشرف 🛡️`);const m={'1':'mute','2':'kick','3':'mod'};if(m[c])socket.emit('host_action',{streamId:actS,actorId:uid,targetUserId:tid,action:m[c]});}
+socket.on('system_live_notice',t=>document.getElementById('l-chat').innerHTML+=`<div style="color:var(--accent-cyan);font-size:12px;">${t}</div>`);
+socket.on('user_kicked',k=>{if(k===uid){alert('تم طردك');location.reload();}});
+function sendG(n,v){socket.emit('send_gift',{streamId:actS,senderId:uid,giftName:n,giftValue:v,pkSide});}
+socket.on('gift_error',m=>alert(m));
+socket.on('gift_received',d=>{document.getElementById('r-earn').innerText=d.newEarned;document.getElementById('l-chat').innerHTML+=`<div style="color:var(--gold-primary);">🎁 ${d.senderName} أرسل ${d.giftName}</div>`;if(d.pk)upPK(d.pk);});
+function upPK(p){document.getElementById('pk-box').style.display='block';document.getElementById('pk-l').innerText=`${p.leftName}: ${p.leftScore}`;document.getElementById('pk-r').innerText=`${p.rightName}: ${p.rightScore}`;const t=p.leftScore+p.rightScore;document.getElementById('pk-fill').style.width=(t?Math.round(p.leftScore/t*100):50)+'%';}
+socket.on('pk_updated',upPK);
+socket.on('treasure_dropped',t=>{document.getElementById('tr-box').style.display='block';document.getElementById('tr-t').innerText=`🎁 كنز ${t.ownerName} (${t.coins} ج)`;});
+socket.on('treasure_ended',()=>document.getElementById('tr-box').style.display='none');
+function exitR(){if(isH)socket.emit('end_live',{streamId:actS});location.reload();}
+socket.on('live_ended_summary',d=>{alert('انتهى البث! الأرباح: '+d.totalEarned+' ج.م');location.reload();});
+</script></body></html>

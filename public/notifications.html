@@ -1,0 +1,11 @@
+<!DOCTYPE html>
+<html lang="ar" dir="rtl">
+<head><meta charset="UTF-8"><meta name="viewport" content="width=device-width, initial-scale=1.0"><title>Jacki - الإشعارات</title><link rel="stylesheet" href="style.css"></head>
+<body class="dark-theme">
+<div class="top-bar"><span class="jacki-logo" style="font-size:20px;">Jacki Alerts</span></div>
+<div class="container" id="ab"></div>
+<nav class="bottom-nav"><a href="index.html" class="nav-item">🏠<span>الرئيسية</span></a><a href="live.html" class="nav-item">🔴<span>اللايف</span></a><a href="voice.html" class="nav-item">🎙️<span>غرف صوتية</span></a><a href="chat.html" class="nav-item">💬<span>الدردشة</span></a><a href="notifications.html" class="nav-item active">🔔<span>الإشعارات</span></a><a href="profile.html" class="nav-item">👤<span>حسابي</span></a></nav>
+<script>
+const uid=localStorage.getItem('jacki_userId');if(!uid)location.href='auth.html';
+fetch(`/api/notifications/${uid}`).then(r=>r.json()).then(l=>{document.getElementById('ab').innerHTML=l.length?l.map(n=>`<div class="card"><strong>${n.title}</strong><p style="font-size:13px;color:var(--text-secondary);">${n.message}</p></div>`).join(''):'<div class="card">لا توجد إشعارات.</div>';});
+</script></body></html>
